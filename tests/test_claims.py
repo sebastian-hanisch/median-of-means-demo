@@ -50,6 +50,13 @@ def test_h1_the_tipping_map():
     sym = sum(V.better_in_all_seeds(d, n, dl) for d in S.SYMMETRIC for n in G.N_RASTER for dl in V.COUNT_DELTAS)
     has(f"In {better} von {total} Zellen (10 Verteilungen · 4 n · δ = 0,1 / 0,05 / 0,01 / 0,001) ist Median-of-Means in allen Seeds besser, davon {sym} von 64 bei symmetrischen Verteilungen")
 
+    sp = "Symmetrisch mit Pareto-Rand (α = 2,5)"
+    assert V.tipping_level_of(sp, 50) == 0.5 and V.tipping_level_of(sp, 200) == 0.5
+    has(f"Kippniveau 0,5; Verhältnis zum Mittel bei n = 50: {de(V.kipp_ratio(sp, 50, 0.5), 2)} bei δ = 0,5, {de(V.kipp_ratio(sp, 50, 0.001), 2)} bei δ = 0,001")
+    assert all(V.kipp_ratio(sp, n, dl) < 1 for n in (50, 200) for dl in G.DELTA_GRID)
+    assert max(V.tipping_level_of(d, n) or 0 for d in S.SKEWED for n in G.N_RASTER) == 0.05
+    has("(Kippniveau, wo es eines gibt, höchstens 0,05)")
+
 
 def test_h2_tipping_level_falls_with_n():
     levels = [V.tipping_level_of(L, n) for n in G.N_RASTER]
@@ -62,6 +69,9 @@ def test_h3_price_is_typical_error_and_bias():
     has(f"typischer Fehler von Median-of-Means das {de(V.premium(L, 200, 0.01), 2)}-fache des Mittels bei Lognormal (σ = 1,5) "
         f"({de(V.premium('Lognormal (σ = 2)', 200, 0.01), 2)} bei σ = 2, {de(V.premium('Pareto (α = 2,1)', 200, 0.01), 2)} bei Pareto α = 2,1, {de(V.premium('Normal', 200, 0.01), 2)} bei Normal; √(π/2) = {de(np.sqrt(np.pi / 2), 4)})")
     assert abs(V.premium("Normal", 200, 0.01) - np.sqrt(np.pi / 2)) < 0.03
+    sp = "Symmetrisch mit Pareto-Rand (α = 2,5)"
+    has(f"bei symmetrisch mit Pareto-Rand (α = 2,5) {de(V.premium(sp, 50, 0.01), 2)} bei n = 50 und {de(V.premium(sp, 200, 0.01), 2)} bei n = 200, bei t(3) {de(V.premium('t(3)', 50, 0.01), 2)} bei n = 50")
+    assert V.premium(sp, 50, 0.01) < 1 and V.premium(sp, 200, 0.01) < 1 and V.premium("t(3)", 50, 0.01) < 1
     b200, b1000 = R.bias(L, 200, mom(0.01)), R.bias(L, 1000, mom(0.01, 1000))
     has(f"Verzerrung bei Lognormal (σ = 1,5): {mn(pct(b200))} (K = 37), {mn(pct(b1000))} bei n = 1000")
     ks = (4, 8, 16, 32, 64)
@@ -100,7 +110,8 @@ def test_h5_trimming_with_few_values():
 
 def test_h6_symmetric_tails():
     sym = V.winner_counts(1, dists=S.SYMMETRIC)
-    has(f"bei den 64 symmetrischen Zellen das Trimmen {sym['Trimmen']}, das Mittel {sym['Mittel']} (Normal, t(5)), Median-of-Means {sym['MoM']}")
+    has(f"bei den 64 symmetrischen Zellen das Trimmen {sym['Trimmen']}, das Mittel {sym['Mittel']} (alle bei Normal), Median-of-Means {sym['MoM']}")
+    assert V.winner_counts(1, dists=["Normal"])["Mittel"] == sym["Mittel"]
     has(f"Mittel {de(q('t(3)', 200, 'mean', 0.05))}, Median-of-Means {de(q('t(3)', 200, mom(0.05), 0.05))}, Trimmen mit c = 1 {de(q('t(3)', 200, V.trim_spec(1, 0.05, 200), 0.05))}")
     normal_winners = {V.three_way("Normal", n, d, 1)["Sieger"] for n in G.N_RASTER for d in V.COUNT_DELTAS}
     assert "MoM" not in normal_winners and "Mittel" in normal_winners

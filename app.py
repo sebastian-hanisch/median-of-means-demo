@@ -68,7 +68,7 @@ with st.expander("So funktioniert Median-of-Means", expanded=True):
 1. **Blöcke bilden:** Die n Werte werden der Reihe nach in K zusammenhängende Blöcke geteilt (die ersten n mod K Blöcke bekommen einen Wert mehr; nichts wird weggeworfen).
 2. **Blockmittel:** Jeder Block liefert sein Mittel. Ein einzelner Ausreißer verdirbt höchstens ein Blockmittel.
 3. **Median der Blockmittel:** Der Median der K Blockmittel ist der Schätzer. **K = 1 ist das Mittel, K = n der Median.**
-4. **Der Preis:** Der Median der Blockmittel einer rechtsschiefen Verteilung liegt unter ihrem Mittelwert (Verzerrung), und im Normalfall ist der Fehler größer als beim Mittel.
+4. **Der Preis:** Bei den gemessenen rechtsschiefen Modellen (Lognormal, Pareto) liegt der Median der Blockmittel unter ihrem Mittelwert (Verzerrung), und bei Normal und den schiefen Modellen ist der typische Fehler größer als beim Mittel.
    Die Regel **K = ⌈8 ln(1/δ)⌉** ist eine Faustregel der Vorlage; ihre Herkunft habe ich nicht an einer Quelle geprüft, die Demo behandelt K als Regler und misst.
         """
     )
@@ -221,10 +221,10 @@ st.markdown(
 | **Die Verteilungen sind erfundene Modelle.** | Kein Realdatenbezug: Lognormal und Pareto sind übliche Annahmen für schiefe Mengen und Zeiten, aber kein Beleg, dass echte Sendungsdaten so aussehen. | – |
 | **Das Ziel ist der Mittelwert.** | Wer die Gesamtmenge braucht, braucht den Mittelwert. Zielt man auf den Median, ist der Median-Schätzer typischerweise um ein Vielfaches besser (E5). | Mittelwert und Median (Wurzel der Reihe) |
 | **Median-of-Means ist erwartungstreu genug.** | Bei schiefen Rändern liegt Median-of-Means im Mittel unter dem Mittelwert, umso mehr, je mehr Blöcke (E2). | – |
-| **K folgt einer Regel.** | Die Regel K = ⌈8 ln(1/δ)⌉ ist eine Faustregel, deren Herkunft nicht geprüft ist; das im Nachhinein beste K liegt bei schiefen Rändern meist darunter (E2). Eine datengetriebene Wahl von K ist nicht gebaut. | – |
+| **K folgt einer Regel.** | Die Regel K = ⌈8 ln(1/δ)⌉ ist eine Faustregel, deren Herkunft nicht geprüft ist; das im Nachhinein beste K liegt bei schiefen Rändern in allen Zellen darunter, in denen der Deckel n/2 nicht greift (E2). Eine datengetriebene Wahl von K ist nicht gebaut. | – |
 | **Trimm-Faktor c und K wurden im Nachhinein verglichen.** | Der Vergleich in E4 wählt beide am selben Datensatz; fair wäre die Wahl auf einer Hälfte der Daten (nicht gemessen). | `trimmen-huber-demo` (Trimmen, Winsorisieren, Huber) |
 | **Eine Aussage über das seltene Ereignis braucht viele Läufe.** | Q(1 − δ) bei δ = 0,001 streut zwischen den Seeds (E1, README nennt die Streuung); bei weniger als 100 Überschreitungen kennzeichnet das Nachmessen das Ergebnis als wenig belastbar. | – |
-| **Ein Intervall für den Mittelwert lässt sich aus Median-of-Means bauen.** | Nicht brauchbar gefunden (E6): entweder zu schmal bei schiefen Rändern oder 2,5- bis 5-mal so breit wie Student. Das ist die Auswahl der geprüften Konstruktionen, keine Unmöglichkeitsaussage. | `pearson-demo` (Intervalle für Korrelationen bei schweren Rändern) |
+| **Ein Intervall für den Mittelwert lässt sich aus Median-of-Means bauen.** | Nicht brauchbar gefunden (E6): entweder zu schmal bei schiefen Rändern oder mehr als doppelt so breit wie Student. Das ist die Auswahl der geprüften Konstruktionen, keine Unmöglichkeitsaussage. | `pearson-demo` (Intervalle für Korrelationen bei schweren Rändern) |
 """
 )
 
@@ -239,8 +239,8 @@ with st.expander("🧮 Die Schätzer im Überblick"):
 |---|---|---|---|
 | **Mittel** | Summe geteilt durch n | niemanden, ist aber bei Normal am genauesten | ein Ausreißer verschiebt es beliebig weit |
 | **Median** | mittlerer Wert der sortierten Stichprobe | gegen fast jeden Ausreißer | zielt bei Schiefe auf den Median, nicht den Mittelwert (E5) |
-| **Trimmen** | k kleinste und k größte Werte weglassen, den Rest mitteln | gegen bis zu k Ausreißer je Seite | bei Schiefe zu klein (Verzerrung), k = ⌈c ln(1/δ)⌉ ist eigene Wahl |
-| **Median-of-Means** | K Blockmittel, davon der Median | gegen bis zu etwa K/2 verdorbene Blöcke | im Normalfall ungenauer (Normal: Faktor √(π/2) ≈ 1,25), bei Schiefe zu klein |
+| **Trimmen** | k kleinste und k größte Werte weglassen, den Rest mitteln | gegen bis zu k Ausreißer je Seite | bei schiefen Verteilungen zu klein (Verzerrung), k = ⌈c ln(1/δ)⌉ ist eigene Wahl |
+| **Median-of-Means** | K Blockmittel, davon der Median | gegen bis zu etwa K/2 verdorbene Blöcke | bei Normal ungenauer (Faktor √(π/2) ≈ 1,25), bei den gemessenen schiefen Verteilungen zu klein |
 """
     )
 
